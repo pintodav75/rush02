@@ -1,60 +1,4 @@
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-
-int		ft_strlen(char *str)
-{
-	int i;
-
-	i = 0;
-	while (str[i])
-		i++;
-	return (i);
-}
-
-char	*ft_strdup(char *src)
-{
-	char	*dst;
-	int		i;
-
-	if (!(dst = (char *)malloc(sizeof(char) * ft_strlen(src) + 1)))
-		return (NULL);
-	i = 0;
-	while (src[i])
-	{
-		dst[i] = src[i];
-		i++;
-	}
-	dst[i] = '\0';
-	return (dst);
-}
-
-int		is_space(char c)
-{
-	if (c == '\t' || c == '\v' || c == '\f')
-		return (1);
-	if (c == '\n' || c == ' ' || c == '\r')
-		return (1);
-	return (0);
-}
-
-int		is_num(char c)
-{
-	if (c >= '0' && c <= '9')
-		return (1);
-	return (0);
-}
-
-void	ft_putchar(char c)
-{
-	write(1, &c, 1);
-}
-
-void	ft_putstr(char *str)
-{
-	while (*str)
-		ft_putchar(*str++);
-}
+#include "rush.h"
 
 int		verif(char *str)
 {
@@ -66,7 +10,11 @@ int		verif(char *str)
 	while (is_space(str[i]))
 		i++;
 	while (str[i] == '0')
+	{
+		if (!is_num(str[i + 1]))
+			break;
 		i++;
+	}
 	while (str[i] && is_num(str[i]))
 	{
 		num++;
@@ -83,62 +31,21 @@ int		verif(char *str)
 	return (1);
 }
 
-int		ft_atoi(char *s)
+int		find_word(char *str)
 {
 	int i;
-	int res;
 
 	i = 0;
-	res = 0;
-	while (is_space(s[i]))
-		i++;
-	while (is_num(s[i]))
+	while (str[i] && str[i] != '\n')
 	{
-		res = res * 10 + s[i] - 48;
+		if (!is_space(str[i]))
+			return (1);
 		i++;
 	}
-	return (res);
+	return (0);
 }
 
-int		size_num(int nb)
-{
-	int i;
-
-	i = 1;
-	while (nb / 10 > 0)
-	{
-		nb = nb / 10;
-		i++;
-	}
-	return (i);
-}
-
-void	engine(char *str, int n)
-{
-	if (n / 10 > 0)
-		engine(str - 1, n / 10);
-	*str = (n % 10) + 48;
-}
-
-//char	*ft_strstr(char *str, char *need)
-//{
-//
-//}
-
-char	*ft_itoa(int n)
-{
-	char	*str;
-	int		length;
-
-	length = size_num(n);
-	if (!(str = (char *)malloc(sizeof(char) * length + 1)))
-		return (NULL);
-	str[length] = '\0';
-	engine(str + length - 1, n);
-	return (str);
-}
-
-void	print(char *s)
+void	print(char *s, int count)
 {
 	while (is_space(*s))
 		s++;
@@ -146,9 +53,13 @@ void	print(char *s)
 	{
 		ft_putchar(*s);
 		s++;
+		count++;
 	}
-	if (*s != '\n')
-		return (print(s));
+	if (find_word(s))
+	{
+		ft_putchar(' ');
+		return (print(s, count + 1));
+	}
 	else
 		return;
 }
@@ -169,10 +80,10 @@ int		ft_dico(char *s, char *dictionary)
 	if (read(fd, buffer, 10000) == -1)
 		return (0);
 	buffer[10000] = '\0';
-	printf("%s", buffer);   // jaffiche ici le buffer pour bien voir que le dico est ouvert et lu et est bien stocker dedans
-//	if ((tmp = ft_strstr(buffer, str) != NULL))
-//		if ((tmp = ft_strstr(tmp, ":")))
-//			print(tmp);
+	//printf("%s", buffer);   // jaffiche ici le buffer pour bien voir que le dico est ouvert et lu et est bien stocker dedans
+	if ((tmp = ft_strstr(buffer, str)) != NULL)
+		if ((tmp = ft_strstr(tmp, ":")) != NULL)
+			print(tmp + 1, 0);
 	return (1);
 }
 
